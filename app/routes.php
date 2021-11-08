@@ -208,6 +208,75 @@ return function (App $app) {
             ->withHeader('Access-Control-Allow-Origin', '*');
     });
 
+    $app->get('/respuestas/{ id }', function (Request $request, Response $response, array $args) {
+        $DB = new MySql();
+        $idPregunta = $args['id'];
+        $sql = "SELECT `id_encuesta` FROM `preguntas` WHERE id = ?;";
+        $res = $DB->Buscar_Seguro( $sql, array( $idPregunta ) );
+        if ( count( $res ) != 0 ) {
+            $sql2 = "SELECT * FROM `respuestas_correctas` WHERE id_encuesta = ?";
+            $res2 = $DB->Buscar_Seguro( $sql2, array( $res[0]['id_encuesta'] ) );
+            if ( count( $res2 ) == 0 ) {
+                $info = json_encode(
+                    array(
+                        'success' => false,
+                        'code' => 400,
+                        'data' => $user
+                    )
+                );
+            } else {
+                $info = json_encode(
+                    array(
+                        'success' => true,
+                        'code' => 200,
+                        'data' => $res2
+                    )
+                );
+            }
+        } else {
+            $info = json_encode(
+                array(
+                    'success' => false,
+                    'code' => 400,
+                    'data' => $user
+                )
+            );
+        }
+        $response->getBody()->write( $info );
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Access-Control-Allow-Origin', '*');
+    });
+
+    $app->get('/statusEncuesta/{ encuesta }/{ user }/{ status }', function (Request $request, Response $response, array $args) {
+        $DB = new MySql();
+        $encuesta = $args['encuesta'];
+        $user = $args['user'];
+        $status = $args['status'];
+        $sql = "UPDATE `usuarios_encuestas` SET `status`= ? WHERE `id_usuario` = ? AND `id_encuesta` = ?;";
+        $res = $DB->Buscar_Seguro( $sql, array( $status, $user, $encuesta ) );
+        if ( $res == 200 || $res == '200' ) {
+            $info = json_encode(
+                array(
+                    'success' => true,
+                    'code' => 200,
+                    'data' => $res
+                )
+            );
+        } else {
+            $info = json_encode(
+                array(
+                    'success' => false,
+                    'code' => 400,
+                    'data' => []
+                )
+            );
+        }
+        $response->getBody()->write( $info );
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Access-Control-Allow-Origin', '*');
+    });
 
     // $app->group('/users', function (Group $group) {
     //     $group->get('', ListUsersAction::class);
