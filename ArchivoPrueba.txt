@@ -1,0 +1,2 @@
+Los archivos que se crean con un repositorio sincronizado se suben a git y se descargan en todos los equipos que los tengan
+Este ya esta sincronizado Ve
